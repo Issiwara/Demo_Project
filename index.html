@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Task Board</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg:      #0d0d0f;
+      --surface: #17171a;
+      --surface2:#1f1f24;
+      --border:  #2a2a30;
+      --accent:  #6ee7b7;
+      --indigo:  #818cf8;
+      --orange:  #fb923c;
+      --text:    #f0f0f4;
+      --muted:   #6b6b7a;
+      --danger:  #f87171;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; min-height: 100vh; }
+
+    /* ── Header ── */
+    header {
+      display: flex; align-items: center; gap: 14px;
+      padding: 24px 36px;
+      border-bottom: 1px solid var(--border);
+    }
+    .logo {
+      width: 34px; height: 34px;
+      background: linear-gradient(135deg, var(--indigo), var(--accent));
+      border-radius: 9px;
+      display: grid; place-items: center;
+      font-family: 'Syne', sans-serif; font-weight: 800; font-size: 17px;
+    }
+    .app-name { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 700; }
+    .app-sub  { font-size: 12px; color: var(--muted); }
+    .badge    {
+      margin-left: auto;
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 20px; padding: 4px 14px;
+      font-size: 13px; color: var(--muted);
+    }
+    .badge b  { color: var(--text); }
+
+    /* ── Layout ── */
+    main { padding: 28px 36px; }
+
+    /* ── Form card ── */
+    .form-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 14px; padding: 24px; margin-bottom: 28px;
+    }
+    .form-label {
+      font-family: 'Syne', sans-serif; font-size: 11px; font-weight: 700;
+      letter-spacing: 1.2px; text-transform: uppercase;
+      color: var(--accent); margin-bottom: 18px;
+    }
+    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
+    .field > label {
+      display: block; font-size: 11px; font-weight: 500;
+      color: var(--muted); text-transform: uppercase;
+      letter-spacing: .6px; margin-bottom: 6px;
+    }
+    input, textarea, select {
+      width: 100%; background: var(--surface2);
+      border: 1px solid var(--border); border-radius: 9px;
+      padding: 10px 13px; color: var(--text);
+      font-family: 'DM Sans', sans-serif; font-size: 14px;
+      outline: none; transition: border-color .18s;
+    }
+    input:focus, textarea:focus, select:focus { border-color: var(--indigo); }
+    textarea { resize: vertical; min-height: 74px; }
+    select option { background: var(--surface2); }
+    .form-actions { display: flex; gap: 9px; justify-content: flex-end; margin-top: 6px; }
+
+    /* ── Buttons ── */
+    .btn {
+      padding: 9px 20px; border: none; border-radius: 9px;
+      font-family: 'DM Sans', sans-serif; font-size: 14px;
+      font-weight: 500; cursor: pointer; transition: all .14s;
+    }
+    .btn-primary   { background: var(--indigo); color: #fff; }
+    .btn-primary:hover { background: #6c72e8; transform: translateY(-1px); }
+    .btn-ghost     { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
+    .btn-ghost:hover { border-color: var(--muted); }
+    .btn-edit, .btn-del {
+      padding: 5px 11px; font-size: 12px;
+      background: transparent; border: 1px solid transparent;
+    }
+    .btn-edit  { color: var(--indigo); }
+    .btn-edit:hover  { border-color: var(--indigo); background: rgba(129,140,248,.08); }
+    .btn-del   { color: var(--danger); }
+    .btn-del:hover   { border-color: var(--danger); background: rgba(248,113,113,.08); }
+
+    /* ── Board ── */
+    .board { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+    .col   { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 18px; }
+    .col-head {
+      display: flex; align-items: center; gap: 9px;
+      padding-bottom: 13px; margin-bottom: 14px;
+      border-bottom: 1px solid var(--border);
+    }
+    .dot   { width: 7px; height: 7px; border-radius: 50%; }
+    .col-title { font-family: 'Syne', sans-serif; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
+    .col-n  { margin-left: auto; background: var(--surface2); border-radius: 20px; padding: 2px 9px; font-size: 12px; color: var(--muted); }
+
+    /* ── Cards ── */
+    .card {
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 11px; padding: 14px; margin-bottom: 9px;
+      transition: border-color .18s, transform .13s;
+    }
+    .card:hover { border-color: var(--muted); transform: translateY(-1px); }
+    .card-title { font-size: 14px; font-weight: 500; line-height: 1.4; margin-bottom: 5px; }
+    .card-desc  { font-size: 12px; color: var(--muted); line-height: 1.5; margin-bottom: 11px; }
+    .card-foot  { display: flex; align-items: center; justify-content: space-between; }
+    .card-date  { font-size: 11px; color: var(--muted); }
+    .card-acts  { display: flex; gap: 3px; }
+
+    /* ── Empty ── */
+    .empty { text-align: center; padding: 28px 0; color: var(--muted); font-size: 13px; }
+    .empty span { display: block; font-size: 24px; margin-bottom: 7px; }
+
+    /* ── Toast ── */
+    #toast {
+      position: fixed; bottom: 24px; right: 24px;
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 11px; padding: 11px 18px;
+      font-size: 13px; opacity: 0; transform: translateY(8px);
+      transition: all .25s; z-index: 999;
+    }
+    #toast.show    { opacity: 1; transform: translateY(0); }
+    #toast.success { border-color: var(--accent); color: var(--accent); }
+    #toast.error   { border-color: var(--danger); color: var(--danger); }
+
+    /* ── Spinner ── */
+    .spin {
+      width: 18px; height: 18px; margin: 28px auto;
+      border: 2px solid var(--border); border-top-color: var(--indigo);
+      border-radius: 50%; animation: s .6s linear infinite;
+    }
+    @keyframes s { to { transform: rotate(360deg); } }
+
+    @media(max-width:780px){
+      .board { grid-template-columns: 1fr; }
+      .row   { grid-template-columns: 1fr; }
+      main, header { padding: 16px; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo">T</div>
+  <div>
+    <div class="app-name">Task Board</div>
+    <div class="app-sub">CRUD Application</div>
+  </div>
+  <div class="badge">Tasks: <b id="total">0</b></div>
+</header>
+
+<main>
+
+  <!-- Form -->
+  <div class="form-card">
+    <div class="form-label" id="formLabel">New Task</div>
+    <input type="hidden" id="editId"/>
+    <div class="row">
+      <div class="field">
+        <label>Title *</label>
+        <input id="iTitle" type="text" placeholder="Task title..."/>
+      </div>
+      <div class="field">
+        <label>Status</label>
+        <select id="iStatus">
+          <option value="todo">To Do</option>
+          <option value="in-progress">In Progress</option>
+          <option value="done">Done</option>
+        </select>
+      </div>
+    </div>
+    <div class="field" style="margin-bottom:14px">
+      <label>Description</label>
+      <textarea id="iDesc" placeholder="Optional description..."></textarea>
+    </div>
+    <div class="form-actions">
+      <button class="btn btn-ghost"   onclick="resetForm()">Cancel</button>
+      <button class="btn btn-primary" id="submitBtn" onclick="submitForm()">Add Task</button>
+    </div>
+  </div>
+
+  <!-- Board -->
+  <div class="board">
+    <div class="col">
+      <div class="col-head">
+        <div class="dot" style="background:var(--indigo)"></div>
+        <div class="col-title" style="color:var(--indigo)">To Do</div>
+        <div class="col-n" id="n-todo">0</div>
+      </div>
+      <div id="col-todo"><div class="spin"></div></div>
+    </div>
+    <div class="col">
+      <div class="col-head">
+        <div class="dot" style="background:var(--orange)"></div>
+        <div class="col-title" style="color:var(--orange)">In Progress</div>
+        <div class="col-n" id="n-progress">0</div>
+      </div>
+      <div id="col-in-progress"><div class="spin"></div></div>
+    </div>
+    <div class="col">
+      <div class="col-head">
+        <div class="dot" style="background:var(--accent)"></div>
+        <div class="col-title" style="color:var(--accent)">Done</div>
+        <div class="col-n" id="n-done">0</div>
+      </div>
+      <div id="col-done"><div class="spin"></div></div>
+    </div>
+  </div>
+
+</main>
+
+<div id="toast"></div>
+
+<script>
+  const API = '/api/items';
+  let all  = [];
+
+  // ── Toast ──────────────────────────────────────────────────────────────────
+  function toast(msg, type = 'success') {
+    const el = document.getElementById('toast');
+    el.textContent = msg;
+    el.className   = 'show ' + type;
+    setTimeout(() => el.className = '', 2400);
+  }
+
+  // ── Helpers ────────────────────────────────────────────────────────────────
+  const esc = s => s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  const fmt = s => new Date(s).toLocaleDateString('en-US',{month:'short',day:'numeric'});
+
+  // ── Render ─────────────────────────────────────────────────────────────────
+  function cardHTML(item) {
+    return `<div class="card" id="card-${item.id}">
+      <div class="card-title">${esc(item.title)}</div>
+      ${item.description ? `<div class="card-desc">${esc(item.description)}</div>` : ''}
+      <div class="card-foot">
+        <span class="card-date">${fmt(item.created_at)}</span>
+        <div class="card-acts">
+          <button class="btn btn-edit" onclick="startEdit(${item.id})">Edit</button>
+          <button class="btn btn-del"  onclick="del(${item.id})">Delete</button>
+        </div>
+      </div>
+    </div>`;
+  }
+
+  function render(items) {
+    const g = { 'todo':[], 'in-progress':[], 'done':[] };
+    items.forEach(i => g[i.status]?.push(i));
+
+    ['todo','in-progress','done'].forEach(s => {
+      const el = document.getElementById('col-' + s);
+      el.innerHTML = g[s].length
+        ? g[s].map(cardHTML).join('')
+        : `<div class="empty"><span>✦</span>No tasks</div>`;
+    });
+
+    document.getElementById('n-todo').textContent    = g['todo'].length;
+    document.getElementById('n-progress').textContent= g['in-progress'].length;
+    document.getElementById('n-done').textContent    = g['done'].length;
+    document.getElementById('total').textContent     = items.length;
+  }
+
+  // ── Load ───────────────────────────────────────────────────────────────────
+  async function load() {
+    try {
+      const res = await fetch(API);
+      all = await res.json();
+      render(all);
+    } catch {
+      toast('Cannot reach backend', 'error');
+      ['todo','in-progress','done'].forEach(s => {
+        document.getElementById('col-'+s).innerHTML =
+          '<div class="empty"><span>⚠️</span>Backend offline</div>';
+      });
+    }
+  }
+
+  // ── Submit ─────────────────────────────────────────────────────────────────
+  async function submitForm() {
+    const id     = document.getElementById('editId').value;
+    const title  = document.getElementById('iTitle').value.trim();
+    const desc   = document.getElementById('iDesc').value.trim();
+    const status = document.getElementById('iStatus').value;
+
+    if (!title) { toast('Title is required', 'error'); return; }
+
+    try {
+      const res = await fetch(id ? `${API}/${id}` : API, {
+        method:  id ? 'PUT' : 'POST',
+        headers: {'Content-Type':'application/json'},
+        body:    JSON.stringify({ title, description: desc, status }),
+      });
+      if (!res.ok) throw new Error();
+      toast(id ? 'Task updated!' : 'Task created!');
+      resetForm();
+      load();
+    } catch {
+      toast('Failed to save', 'error');
+    }
+  }
+
+  // ── Edit ───────────────────────────────────────────────────────────────────
+  function startEdit(id) {
+    const item = all.find(i => i.id === id);
+    if (!item) return;
+    document.getElementById('editId').value  = id;
+    document.getElementById('iTitle').value  = item.title;
+    document.getElementById('iDesc').value   = item.description || '';
+    document.getElementById('iStatus').value = item.status;
+    document.getElementById('formLabel').textContent  = 'Edit Task';
+    document.getElementById('submitBtn').textContent  = 'Update Task';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function resetForm() {
+    document.getElementById('editId').value  = '';
+    document.getElementById('iTitle').value  = '';
+    document.getElementById('iDesc').value   = '';
+    document.getElementById('iStatus').value = 'todo';
+    document.getElementById('formLabel').textContent = 'New Task';
+    document.getElementById('submitBtn').textContent = 'Add Task';
+  }
+
+  // ── Delete ─────────────────────────────────────────────────────────────────
+  async function del(id) {
+    if (!confirm('Delete this task?')) return;
+    try {
+      await fetch(`${API}/${id}`, { method: 'DELETE' });
+      toast('Task deleted');
+      load();
+    } catch {
+      toast('Failed to delete', 'error');
+    }
+  }
+
+  load();
+</script>
+</body>
+</html>
